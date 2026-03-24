@@ -1629,13 +1629,28 @@ class MetaClawAPIServer:
             )
         return result
 
+    _AGENT_METADATA_RE = re.compile(
+        r"\["
+        r"(?:Queued message|Conversation info|Sender"
+        r"|Forwarded message context|Replied message context)"
+        r":.*?\]",
+        re.DOTALL,
+    )
+
+    @staticmethod
+    def _extract_task_description(raw_content: str) -> str:
+        """Strip agent metadata so embedding queries reflect actual task content."""
+        cleaned = MetaClawAPIServer._AGENT_METADATA_RE.sub("", raw_content)
+        return cleaned.strip()
+
     def _inject_skills(self, messages: list[dict]) -> list[dict]:
         """Prepend skill guidance to the system message."""
         if not self.skill_manager:
             return messages
 
         user_msgs = [m for m in messages if m.get("role") == "user"]
-        task_desc = _flatten_message_content(user_msgs[-1].get("content", "")) if user_msgs else ""
+        raw_content = _flatten_message_content(user_msgs[-1].get("content", "")) if user_msgs else ""
+        task_desc = self._extract_task_description(raw_content)
         if not task_desc:
             return messages
 
