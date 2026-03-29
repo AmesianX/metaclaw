@@ -1580,7 +1580,7 @@ class MetaClawAPIServer:
             headers["Authorization"] = f"Bearer {self.config.llm_api_key}"
         # OpenRouter requires HTTP-Referer and X-Title for free-tier model access
         if "openrouter.ai" in api_base:
-            headers.setdefault("HTTP-Referer", "https://github.com/qwibitai/metaclaw")
+            headers.setdefault("HTTP-Referer", "https://github.com/aiming-lab/MetaClaw")
             headers.setdefault("X-Title", "MetaClaw")
 
         try:
